@@ -44,9 +44,11 @@ def execute_query(query:str):
             text=True
         )
         elasped_time:float = time.time() - start_time
+        minutes: int = int(elasped_time // 60)
+        seconds: int = int(elasped_time % 60)
 
         if process.returncode ==0:
-            logging.info(f"Success: Executed query: {query} with output: {process.stdout} in {elasped_time} seconds".replace("\n",""))
+            logging.info(f"Success: Executed query: {query} with output: {process.stdout} in {minutes} minutes {seconds} seconds".replace("\n",""))
             return True
         else:
             error_message:str = f"Cannot executing query: {query} with error_status: {process.stderr}".replace("\n","")
