@@ -1,9 +1,8 @@
 import argparse
 import subprocess
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, Future, as_completed, as_completed
+from concurrent.futures import ProcessPoolExecutor, Future, as_completed, as_completed
 import logging
 import time
-from typing import Sequence
 
 
 ## USER CONFIG ##
