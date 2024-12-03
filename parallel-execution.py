@@ -46,11 +46,11 @@ def execute_query(query:str):
         elasped_time:float = time.time() - start_time
 
         if process.returncode ==0:
-            logging.info(f"Success [{elasped_time}]: Executed query: {query} | Output: {process.stdout}".replace("\n",""))
+            logging.info(f"Success [{elasped_time}]: Executed query: {query} with output: {process.stdout}".replace("\n",""))
             return True
         else:
-            error_message:str = f"Error executing query: {query} | Error: {process.stderr}".replace("\n","")
-            logging.error(error_message)
+            error_message:str = f"Cannot executing query: {query} with error_status: {process.stderr}".replace("\n","")
+            logging.warning(error_message)
             return False
         
     except Exception as e:
@@ -80,7 +80,7 @@ def read_query_from_file(file_path:str):
 
 if __name__ == "__main__":
     # Read all statement in file
-    logging.info(f"Initialize script with: \n oracle_user: {oracle_user} \n database: {database} \n maximum_threads: {max_threads}")
+    logging.info(f"Initialize script with: {{oracle_user: {oracle_user}, database: {database}, maximum_parallel: {max_threads}}}")
     execute_statement_list:list[str] = read_query_from_file(args.file)
     total_sql_statement:int = len(execute_statement_list)
     max_threads:int = min(len(execute_statement_list), max_threads)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                 logging.error(f"Error in task: {e}")
         
         
-        report:str = f"Complete total execution sql statement: {total_sql_statement} with successfully applied: {process_ok}"
+        report:str = f"Complete execute sql statement: {total_sql_statement} with successfully affected: {process_ok}"
         if total_sql_statement != process_ok:
             logging.warning(report)
         else:
