@@ -74,9 +74,10 @@ def read_query_from_file(file_path:str):
         content:str = file.read().replace('\n','')
         
     split_statements:list[str] = content.split(';')
-    logging.info(f"Found total statement: {len(split_statements)}")
+    result_statement:list[str] = list(filter(None, split_statements))
+    logging.info(f"Found total statement: {len(result_statement)}")
 
-    return split_statements
+    return result_statement
 
 
 if __name__ == "__main__":
