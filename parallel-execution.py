@@ -11,7 +11,6 @@ oracle_pass:str = ""
 database:str = ""
 connection:str = f"sqlplus -S {oracle_user}/{oracle_pass}@{database}"
 log_file:str = "./output.log"
-dsn:str = "localhost/ORCLPD1"
 max_threads:int = 10
 
 # Receive args from user with --file
@@ -81,6 +80,7 @@ def read_query_from_file(file_path:str):
 
 if __name__ == "__main__":
     # Read all statement in file
+    logging.info(f"Initialize script with: \n oracle_user: {oracle_user} \n database: {database} \n maximum_threads: {max_threads}")
     execute_statement_list:list[str] = read_query_from_file(args.file)
     total_sql_statement:int = len(execute_statement_list)
     max_threads:int = min(len(execute_statement_list), max_threads)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                 logging.error(f"Error in task: {e}")
         
         
-        report:str = f"Complete total execution sql statement: {total_sql_statement} with successfully execute: {process_ok}"
+        report:str = f"Complete total execution sql statement: {total_sql_statement} with successfully applied: {process_ok}"
         if total_sql_statement != process_ok:
             logging.warning(report)
         else:
