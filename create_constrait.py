@@ -1,8 +1,9 @@
 import argparse
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, Future, as_completed, as_completed
 import logging
 import time
+from typing import Sequence
 
 
 ## USER CONFIG ##
@@ -48,16 +49,16 @@ def execute_query(query:str):
 
         if process.returncode ==0:
             logging.info(f"Success [{elasped_time}]: Executed query: {query} | Output: {process.stdout}".replace("\n",""))
-            return f"Success: {query}"
+            return True
         else:
             error_message:str = f"Error executing query: {query} | Error: {process.stderr}".replace("\n","")
             logging.error(error_message)
-            return error_message
+            return False
         
     except Exception as e:
         error_message:str = f"Exception executing query: {query} - {e}"
         logging.error(error_message)
-        return error_message
+        return False
     
 
 def read_query_from_file(file_path:str):
@@ -71,7 +72,7 @@ def read_query_from_file(file_path:str):
     """
     with open(file_path, 'r') as file:
         content:str = file.read().replace('\n','')
-    
+        
     split_statements:list[str] = content.split(';')
     logging.info(f"Found total statement: {len(split_statements)}")
 
@@ -81,9 +82,26 @@ def read_query_from_file(file_path:str):
 if __name__ == "__main__":
     # Read all statement in file
     execute_statement_list:list[str] = read_query_from_file(args.file)
+    total_sql_statement:int = len(execute_statement_list)
     max_threads:int = min(len(execute_statement_list), max_threads)
     
-    with ThreadPoolExecutor(max_workers=max_threads) as executor:
-        results:list[str] = list(executor.map(execute_query, execute_statement_list))
-
+    with ProcessPoolExecutor(max_workers=max_threads) as executor:
+        future_to_statement:list[Future[bool]] = [executor.submit(execute_query, statement) for statement in execute_statement_list]
+        
+        
+        process_ok: int = 0
+        for future in as_completed(future_to_statement):
+            try:
+                result = future.result()
+                if result == True:
+                    process_ok += 1
+            except Exception as e:
+                logging.error(f"Error in task: {e}")
+        
+        
+        report:str = f"Complete total execution sql statement: {total_sql_statement} with successfully execute: {process_ok}"
+        if total_sql_statement != process_ok:
+            logging.warning(report)
+        else:
+            logging.info(report)
     
